@@ -1,0 +1,23 @@
+[
+	{
+	"id": "1",
+	"employee_name": "Tiger Nixon",
+	"employee_salary": "320800",
+	"employee_age": "61",
+	"profile_image": ""
+	},
+	{
+	"id": "2",
+	"employee_name": "Mayur",
+	"employee_salary": "32054800",
+	"employee_age": "65",
+	"profile_image": "Hello"
+	},
+	{
+	"id": "3",
+	"employee_name": "Pratap",
+	"employee_salary": "32088500",
+	"employee_age": "50",
+	"profile_image": "Hiii"
+	}
+]

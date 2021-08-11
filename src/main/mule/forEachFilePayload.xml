@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config1" doc:name="HTTP Listener config" doc:id="a81377c1-1cc7-45b3-8d05-27df4682813a" >
+		<http:listener-connection host="0.0.0.0" port="8083" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="dad82d77-2164-4c2b-96c6-f2a5cc975f5c" />
+	<file:config name="File_Config_03" doc:name="File Config" doc:id="40f36eb3-6e96-4086-8645-b30ed278b07c" />
+	<flow name="forEachFilePayloadFlow" doc:id="af720bdb-d813-4efc-bd53-85dcc54740d8" >
+		<http:listener doc:name="Listener" doc:id="88b00e5c-9793-44b7-a6b2-5f51b8a2a769" config-ref="HTTP_Listener_config1" path="/forEachFilePayload"/>
+		<file:read doc:name="Reading Employee Records" doc:id="35328fbc-3749-49f7-a93e-deeb8137c890" config-ref="File_Config" path="C:\Users\mules\Desktop\Mayur Mulesoft Architecture\Employee.json"/>
+		<ee:transform doc:name="Employee List" doc:id="a3ccbfdf-f1dc-4ed8-b64f-b1cfc12b3001" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="employeeList" ><![CDATA[%dw 2.0
+output application/json
+---
+[] as Array]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="6c295833-7cca-45df-bb81-74e9e31dd254" collection="#[payload]">
+			<logger level="INFO" doc:name="I m in the For Each Loop" doc:id="5a295edb-204b-414f-a66e-c57dfa7b0a6e" message="I m in the For Each Loop"/>
+			<file:read doc:name="Reading New File" doc:id="0746f8ec-cc57-476d-bcbb-b05995ea248c" config-ref="File_Config_03" path="C:\Users\mules\Desktop\Mayur Mulesoft Architecture\EmployeeNew.json"/>
+			<ee:transform doc:name="Accumulating" doc:id="2ee359a3-e129-4e83-bc3b-27ebd1cecd5a" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="employeeList" ><![CDATA[%dw 2.0
+output application/json
+---
+ 	//flatten(vars.employeeList ++ [
+ 		//{
+ 		//	"Employee_Id" : payload.id,
+ 	//		
+ //		}
+// 	])
+
+payload]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</foreach>
+		<logger level="INFO" doc:name="Logging Payload" doc:id="db801fca-4d3d-4931-bd3c-97142fbf3a45" message="#[payload]"/>
+		<ee:transform doc:name="Printing Employee Records" doc:id="dcb6ad9c-664a-4da2-9330-30395d9c4bcc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

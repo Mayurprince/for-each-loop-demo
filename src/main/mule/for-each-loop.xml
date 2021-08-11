@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="cde08f70-6675-482a-a3e3-d7cb1999cd30" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config_ForEach" doc:name="File Config" doc:id="ed62a76a-07a4-49d2-9803-acfcbee9552d" />
+	<file:config name="File_Config_02" doc:name="File Config" doc:id="3e4790aa-e338-4009-9cb0-d61da460d07a" />
+	<http:listener-config name="HTTP_Listener_config_01" doc:name="HTTP Listener config" doc:id="c730f7ba-6c81-4084-a612-f0febea1ba96" >
+		<http:listener-connection host="0.0.0.0" port="8082" />
+	</http:listener-config>
+	<flow name="for-each-loopFlow" doc:id="981d1d5b-df11-47c3-a614-e7c212753ca8" >
+		<http:listener doc:name="Receiving Small amount size data for For Each" doc:id="dc3004a6-0dc8-4346-9728-3e175dd58724" config-ref="HTTP_Listener_config" path="/foreachexample"/>
+		<file:read doc:id="77aba87a-c94d-4174-ae2c-6919f462b8fe" doc:name="Read BMW Records" config-ref="File_Config_ForEach" path="C:\Users\mules\Desktop\Mayur Mulesoft Architecture\Employee.json"/>
+		<foreach doc:name="For Each" doc:id="369a8dcf-4efb-4c38-88eb-610e10949fb5" collection="#[payload]">
+			<logger level="INFO" doc:name="For Each Message" doc:id="8350a13c-bbd4-4b0f-a422-fdbf108527bb" message="Hi I m in the For Each"/>
+			<logger level="INFO" doc:name="Logging Payload" doc:id="a464be04-98ae-42b9-a9aa-b2e02ecaea93" message="#[payload]"/>
+			<http:request method="GET" doc:name="Sending Request to Employee REST API" doc:id="475a05b5-caab-47be-93d0-dbcc026483b2" url="http://dummy.restapiexample.com/api/v1/employee/{emp_ID}">
+				<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"emp_ID" : payload.id
+}]]]></http:uri-params>
+			</http:request>
+			<set-variable value="#[payload]" doc:name="Getting Response" doc:id="693c3646-7beb-4806-969e-a351a199cbf4" variableName="receivingRecords"/>
+			<logger level="INFO" doc:name="Getting Request Response" doc:id="044ad024-9416-4027-a069-9b8e56944db1" message="Getting Request Response : #[payload]"/>
+			<file:write doc:name="Write employe data in JAON file" doc:id="65619feb-5d67-4672-b5c5-fe27058793a7" config-ref="File_Config_03" path="#['C:\Users\mules\Desktop\Mayur Mulesoft Architecture\Success.json']">
+				<file:content ><![CDATA[#[output application/json --- payload]]]></file:content>
+			</file:write>
+		</foreach>
+		<ee:transform doc:name="Printting Payload" doc:id="526b711e-f91e-487b-a253-13312a47817c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.receivingRecords]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="for-each-loopFlow1" doc:id="8841632d-e096-44cd-963b-a4994d947e20" >
+		<http:listener doc:name="Listener" doc:id="f467efd3-cef7-41a4-a2aa-270524eaf1dc" config-ref="HTTP_Listener_config_01" path="/simpleFroeach"/>
+		<set-payload value='#[[1,2,3,4,5,"Mayur"]]' doc:name="Setting up Input payload" doc:id="1547cce6-93d8-4307-81c6-6d0409b48c66"/>
+		<set-variable value="#[[]]" doc:name="Setting up Success Records" doc:id="abe65f5a-24ca-4d10-b502-61bba31421f8" variableName="gettingSuccessRecords"/>
+		<set-variable value="#[[]]" doc:name="Setting up Failure Records" doc:id="d5e13689-2644-4ca5-b290-3779ff39a13e" variableName="gettingFailureRecords"/>
+		<foreach doc:name="For Each" doc:id="2101abea-8064-45e9-9259-63eefd225d1f" collection="#[payload]">
+			<try doc:name="Try" doc:id="fa5fe1b1-d1fd-4a63-bbe6-00f1bf36a387" >
+				<set-payload value="#[payload * 10]" doc:name="Setting up payload * 10" doc:id="141d97ed-9bab-4253-a67e-8f975c0ef4e5"/>
+				<set-variable value="#[output application/json --- vars.gettingSuccessRecords + payload]" doc:name="Accumulating Success Records" doc:id="35696f29-d3f0-41e3-9f53-127000c3108b" variableName="gettingSuccessRecords"/>
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="aafc9202-e0ed-40aa-9b2c-5b2479d6100e" >
+						<logger level="INFO" doc:name="Just Continue Flow" doc:id="b41d102e-9417-4371-8968-3c3888066588" message="Just Continue Flow"/>
+						<set-variable value="#[output application/json --- vars.gettingFailureRecords + payload]" doc:name="Accumulating Falured Records" doc:id="6c1edb54-94f7-483e-9ace-6374f0fd5090" variableName="gettingFailureRecords"/>
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</foreach>
+		<logger level="INFO" doc:name="Logging Original Payload" doc:id="dba66cdf-6218-4e1d-88f4-97161f9764b7" message="Original Payload : #[payload]"/>
+		<ee:transform doc:name="Printing All Payload values" doc:id="7adeff4d-e6a2-4637-88d6-723307b72e69">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Original Payload" : payload,
+	"Modified Payload" : vars.gettingSuccessRecords,
+	"Falied Payload" : vars.gettingFailureRecords
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

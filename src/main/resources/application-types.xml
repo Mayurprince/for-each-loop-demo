@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="Employee" format="json">
+      <types:shape format="weave" example="examples/Employee.json"><![CDATA[%dw 2.0
+
+type Employee = Array<{|  id: String,   employee_name: String,   employee_salary: String,   employee_age: String,   profile_image: String|}> {"example": "[{\\\"id\\\":\\\"1\\\",\\\"employee_name\\\":\\\"Tiger Nixon\\\",\\\"employee_salary\\\":\\\"320800\\\",\\\"employee_age\\\":\\\"61\\\",\\\"profile_image\\\":\\\"\\\"},{\\\"id\\\":\\\"2\\\",\\\"employee_name\\\":\\\"Mayur\\\",\\\"employee_salary\\\":\\\"32054800\\\",\\\"employee_age\\\":\\\"65\\\",\\\"profile_image\\\":\\\"Hello\\\"},{\\\"id\\\":\\\"3\\\",\\\"employee_name\\\":\\\"Pratap\\\",\\\"employee_salary\\\":\\\"32088500\\\",\\\"employee_age\\\":\\\"50\\\",\\\"profile_image\\\":\\\"Hiii\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#475a05b5-caab-47be-93d0-dbcc026483b2">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="Employee"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
